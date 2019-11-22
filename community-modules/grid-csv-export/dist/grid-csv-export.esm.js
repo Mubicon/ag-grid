@@ -1,5 +1,5 @@
 /**
- * @ag-grid-community/csv-export - Advanced Data Grid / Data Table supporting Javascript / React / AngularJS / Web Components * @version v22.0.0
+ * @ag-grid-community/csv-export - Advanced Data Grid / Data Table supporting Javascript / React / AngularJS / Web Components * @version v22.0.0-plus
  * @link http://www.ag-grid.com/
 ' * @license MIT
  */

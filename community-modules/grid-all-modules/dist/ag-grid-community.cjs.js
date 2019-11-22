@@ -1,5 +1,5 @@
 /**
- * @ag-grid-community/all-modules - Advanced Data Grid / Data Table supporting Javascript / React / AngularJS / Web Components * @version v22.0.0
+ * @ag-grid-community/all-modules - Advanced Data Grid / Data Table supporting Javascript / React / AngularJS / Web Components * @version v22.0.0-plus
  * @link http://www.ag-grid.com/
 ' * @license MIT
  */
@@ -39371,7 +39371,1506 @@ var CsvExportModule = {
     beans: [CsvCreator, Downloader, XmlFactory, GridSerializer, ZipContainer]
 };
 
-var AllCommunityModules = [ClientSideRowModelModule, InfiniteRowModelModule, CsvExportModule];
+var __decorate$1Z = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var LicenseManager = /** @class */ (function () {
+    function LicenseManager() {
+        this.watermarkMessage = undefined;
+    }
+    LicenseManager_1 = LicenseManager;
+    LicenseManager.prototype.validateLicense = function () {
+        if (_.missingOrEmpty(LicenseManager_1.licenseKey)) {
+            this.outputMissingLicenseKey();
+        }
+        else if (LicenseManager_1.licenseKey.length > 32) {
+            var _a = LicenseManager_1.extractLicenseComponents(LicenseManager_1.licenseKey), md5 = _a.md5, license = _a.license, version = _a.version, isTrial = _a.isTrial;
+            if (md5 === this.md5.md5(license)) {
+                if (_.exists(version) && version) {
+                    this.validateLicenseKeyForVersion(version, !!isTrial, license);
+                }
+                else {
+                    this.validateLegacyKey(license);
+                }
+            }
+            else {
+                this.outputInvalidLicenseKey();
+            }
+        }
+        else {
+            this.outputInvalidLicenseKey();
+        }
+    };
+    LicenseManager.extractExpiry = function (license) {
+        var restrictionHashed = license.substring(license.lastIndexOf('_') + 1, license.length);
+        return new Date(parseInt(LicenseManager_1.decode(restrictionHashed), 10));
+    };
+    LicenseManager.extractLicenseComponents = function (licenseKey) {
+        var hashStart = licenseKey.length - 32;
+        var md5 = licenseKey.substring(hashStart);
+        var license = licenseKey.substring(0, hashStart);
+        var _a = LicenseManager_1.extractBracketedInformation(licenseKey), version = _a[0], isTrial = _a[1];
+        return { md5: md5, license: license, version: version, isTrial: isTrial };
+    };
+    LicenseManager.prototype.getLicenseDetails = function (licenseKey) {
+        var _a = LicenseManager_1.extractLicenseComponents(licenseKey), md5 = _a.md5, license = _a.license, version = _a.version, isTrial = _a.isTrial;
+        var valid = (md5 === this.md5.md5(license));
+        var expiry = null;
+        if (valid) {
+            expiry = LicenseManager_1.extractExpiry(license);
+            valid = !isNaN(expiry.getTime());
+        }
+        return {
+            licenseKey: licenseKey,
+            valid: valid,
+            expiry: valid ? LicenseManager_1.formatDate(expiry) : null,
+            version: version ? version : 'legacy',
+            isTrial: isTrial
+        };
+    };
+    LicenseManager.prototype.isDisplayWatermark = function () {
+        return !_.missingOrEmpty(this.watermarkMessage);
+    };
+    LicenseManager.prototype.getWatermarkMessage = function () {
+        return this.watermarkMessage;
+    };
+    LicenseManager.formatDate = function (date) {
+        var monthNames = [
+            'January', 'February', 'March',
+            'April', 'May', 'June', 'July',
+            'August', 'September', 'October',
+            'November', 'December'
+        ];
+        var day = date.getDate();
+        var monthIndex = date.getMonth();
+        var year = date.getFullYear();
+        return day + ' ' + monthNames[monthIndex] + ' ' + year;
+    };
+    LicenseManager.getGridReleaseDate = function () {
+        return new Date(parseInt(LicenseManager_1.decode(LicenseManager_1.RELEASE_INFORMATION), 10));
+    };
+    LicenseManager.decode = function (input) {
+        var keystr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+        var t = '';
+        var n, r, i;
+        var s, o, u, a;
+        var f = 0;
+        var e = input.replace(/[^A-Za-z0-9+/=]/g, '');
+        while (f < e.length) {
+            s = keystr.indexOf(e.charAt(f++));
+            o = keystr.indexOf(e.charAt(f++));
+            u = keystr.indexOf(e.charAt(f++));
+            a = keystr.indexOf(e.charAt(f++));
+            n = s << 2 | o >> 4;
+            r = (o & 15) << 4 | u >> 2;
+            i = (u & 3) << 6 | a;
+            t = t + String.fromCharCode(n);
+            if (u != 64) {
+                t = t + String.fromCharCode(r);
+            }
+            if (a != 64) {
+                t = t + String.fromCharCode(i);
+            }
+        }
+        t = LicenseManager_1.utf8_decode(t);
+        return t;
+    };
+    LicenseManager.utf8_decode = function (input) {
+        input = input.replace(/rn/g, 'n');
+        var t = '';
+        for (var n = 0; n < input.length; n++) {
+            var r = input.charCodeAt(n);
+            if (r < 128) {
+                t += String.fromCharCode(r);
+            }
+            else if (r > 127 && r < 2048) {
+                t += String.fromCharCode(r >> 6 | 192);
+                t += String.fromCharCode(r & 63 | 128);
+            }
+            else {
+                t += String.fromCharCode(r >> 12 | 224);
+                t += String.fromCharCode(r >> 6 & 63 | 128);
+                t += String.fromCharCode(r & 63 | 128);
+            }
+        }
+        return t;
+    };
+    LicenseManager.setLicenseKey = function (licenseKey) {
+        LicenseManager_1.licenseKey = licenseKey;
+    };
+    LicenseManager.extractBracketedInformation = function (licenseKey) {
+        var matches = licenseKey.split('[')
+            .filter(function (v) {
+            return v.indexOf(']') > -1;
+        })
+            .map(function (value) {
+            return value.split(']')[0];
+        });
+        if (!matches || matches.length === 0) {
+            return [null, null];
+        }
+        var isTrial = matches.filter(function (match) { return match === 'TRIAL'; }).length === 1;
+        var version = matches.filter(function (match) { return match.indexOf("v") === 0; }).map(function (match) { return match.replace(/^v/, ""); })[0];
+        return [version, isTrial];
+    };
+    LicenseManager.prototype.validateLicenseKeyForVersion = function (version, isTrial, license) {
+        switch (version) {
+            case "2":
+                if (isTrial) {
+                    this.validateForTrial(license);
+                }
+                else {
+                    this.validateLegacyKey(license);
+                }
+                break;
+        }
+    };
+    LicenseManager.prototype.validateLegacyKey = function (license) {
+        var gridReleaseDate = LicenseManager_1.getGridReleaseDate();
+        var expiry = LicenseManager_1.extractExpiry(license);
+        var valid = false;
+        var current = false;
+        if (!isNaN(expiry.getTime())) {
+            valid = true;
+            current = (gridReleaseDate < expiry);
+        }
+        if (!valid) {
+            this.outputInvalidLicenseKey();
+        }
+        else if (!current) {
+            var formattedExpiryDate = LicenseManager_1.formatDate(expiry);
+            var formattedReleaseDate = LicenseManager_1.formatDate(gridReleaseDate);
+            this.outputIncompatibleVersion(formattedExpiryDate, formattedReleaseDate);
+        }
+    };
+    LicenseManager.prototype.validateForTrial = function (license) {
+        var expiry = LicenseManager_1.extractExpiry(license);
+        var now = new Date();
+        var valid = false;
+        var current = false;
+        if (!isNaN(expiry.getTime())) {
+            valid = true;
+            current = (expiry > now);
+        }
+        if (!valid) {
+            this.outputInvalidLicenseKey();
+        }
+        else if (!current) {
+            var formattedExpiryDate = LicenseManager_1.formatDate(expiry);
+            this.outputExpiredTrialKey(formattedExpiryDate);
+        }
+    };
+    LicenseManager.prototype.outputInvalidLicenseKey = function () {
+        console.error('*****************************************************************************************************************');
+        console.error('***************************************** ag-Grid Enterprise License ********************************************');
+        console.error('********************************************* Invalid License ***************************************************');
+        console.error('* Your license for ag-Grid Enterprise is not valid - please contact info@ag-grid.com to obtain a valid license. *');
+        console.error('*****************************************************************************************************************');
+        console.error('*****************************************************************************************************************');
+        this.watermarkMessage = "Invalid License";
+    };
+    LicenseManager.prototype.outputExpiredTrialKey = function (formattedExpiryDate) {
+        console.error('****************************************************************************************************************');
+        console.error('***************************************** ag-Grid Enterprise License *******************************************');
+        console.error('*****************************************   Trial Period Expired.    *******************************************');
+        console.error("* Your license for ag-Grid Enterprise expired on " + formattedExpiryDate + ".                                                *");
+        console.error('* Please email info@ag-grid.com to purchase a license.                                                         *');
+        console.error('****************************************************************************************************************');
+        console.error('****************************************************************************************************************');
+        this.watermarkMessage = "Trial Period Expired";
+    };
+    LicenseManager.prototype.outputMissingLicenseKey = function () {
+        console.error('****************************************************************************************************************');
+        console.error('***************************************** ag-Grid Enterprise License *******************************************');
+        console.error('****************************************** License Key Not Found ***********************************************');
+        console.error('* All ag-Grid Enterprise features are unlocked.                                                                *');
+        console.error('* This is an evaluation only version, it is not licensed for development projects intended for production.     *');
+        console.error('* If you want to hide the watermark, please email info@ag-grid.com for a trial license.                        *');
+        console.error('****************************************************************************************************************');
+        console.error('****************************************************************************************************************');
+        this.watermarkMessage = "For Trial Use Only";
+    };
+    LicenseManager.prototype.outputIncompatibleVersion = function (formattedExpiryDate, formattedReleaseDate) {
+        console.error('****************************************************************************************************************************');
+        console.error('********************************************* ag-Grid Enterprise License ***************************************************');
+        console.error('*************************** License not compatible with installed version of ag-Grid Enterprise. ***************************');
+        console.error("* Your license for ag-Grid Enterprise expired on " + formattedExpiryDate + " but the version installed was released on " + formattedReleaseDate + ". *");
+        console.error('* Please contact info@ag-grid.com to renew your subscription to new versions.                                              *');
+        console.error('****************************************************************************************************************************');
+        console.error('****************************************************************************************************************************');
+        this.watermarkMessage = "Incompatible License Version";
+    };
+    var LicenseManager_1;
+    LicenseManager.RELEASE_INFORMATION = 'MTU3MzIwODgzODA2OQ==';
+    __decorate$1Z([
+        Autowired('md5')
+    ], LicenseManager.prototype, "md5", void 0);
+    __decorate$1Z([
+        PreConstruct
+    ], LicenseManager.prototype, "validateLicense", null);
+    LicenseManager = LicenseManager_1 = __decorate$1Z([
+        Bean('licenseManager')
+    ], LicenseManager);
+    return LicenseManager;
+}());
+
+var __decorate$1_ = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var MD5 = /** @class */ (function () {
+    function MD5() {
+        this.ieCompatibility = false;
+    }
+    MD5.prototype.init = function () {
+        this.ieCompatibility = (this.md5('hello') != '5d41402abc4b2a76b9719d911017c592');
+    };
+    MD5.prototype.md5cycle = function (x, k) {
+        var a = x[0], b = x[1], c = x[2], d = x[3];
+        a = this.ff(a, b, c, d, k[0], 7, -680876936);
+        d = this.ff(d, a, b, c, k[1], 12, -389564586);
+        c = this.ff(c, d, a, b, k[2], 17, 606105819);
+        b = this.ff(b, c, d, a, k[3], 22, -1044525330);
+        a = this.ff(a, b, c, d, k[4], 7, -176418897);
+        d = this.ff(d, a, b, c, k[5], 12, 1200080426);
+        c = this.ff(c, d, a, b, k[6], 17, -1473231341);
+        b = this.ff(b, c, d, a, k[7], 22, -45705983);
+        a = this.ff(a, b, c, d, k[8], 7, 1770035416);
+        d = this.ff(d, a, b, c, k[9], 12, -1958414417);
+        c = this.ff(c, d, a, b, k[10], 17, -42063);
+        b = this.ff(b, c, d, a, k[11], 22, -1990404162);
+        a = this.ff(a, b, c, d, k[12], 7, 1804603682);
+        d = this.ff(d, a, b, c, k[13], 12, -40341101);
+        c = this.ff(c, d, a, b, k[14], 17, -1502002290);
+        b = this.ff(b, c, d, a, k[15], 22, 1236535329);
+        a = this.gg(a, b, c, d, k[1], 5, -165796510);
+        d = this.gg(d, a, b, c, k[6], 9, -1069501632);
+        c = this.gg(c, d, a, b, k[11], 14, 643717713);
+        b = this.gg(b, c, d, a, k[0], 20, -373897302);
+        a = this.gg(a, b, c, d, k[5], 5, -701558691);
+        d = this.gg(d, a, b, c, k[10], 9, 38016083);
+        c = this.gg(c, d, a, b, k[15], 14, -660478335);
+        b = this.gg(b, c, d, a, k[4], 20, -405537848);
+        a = this.gg(a, b, c, d, k[9], 5, 568446438);
+        d = this.gg(d, a, b, c, k[14], 9, -1019803690);
+        c = this.gg(c, d, a, b, k[3], 14, -187363961);
+        b = this.gg(b, c, d, a, k[8], 20, 1163531501);
+        a = this.gg(a, b, c, d, k[13], 5, -1444681467);
+        d = this.gg(d, a, b, c, k[2], 9, -51403784);
+        c = this.gg(c, d, a, b, k[7], 14, 1735328473);
+        b = this.gg(b, c, d, a, k[12], 20, -1926607734);
+        a = this.hh(a, b, c, d, k[5], 4, -378558);
+        d = this.hh(d, a, b, c, k[8], 11, -2022574463);
+        c = this.hh(c, d, a, b, k[11], 16, 1839030562);
+        b = this.hh(b, c, d, a, k[14], 23, -35309556);
+        a = this.hh(a, b, c, d, k[1], 4, -1530992060);
+        d = this.hh(d, a, b, c, k[4], 11, 1272893353);
+        c = this.hh(c, d, a, b, k[7], 16, -155497632);
+        b = this.hh(b, c, d, a, k[10], 23, -1094730640);
+        a = this.hh(a, b, c, d, k[13], 4, 681279174);
+        d = this.hh(d, a, b, c, k[0], 11, -358537222);
+        c = this.hh(c, d, a, b, k[3], 16, -722521979);
+        b = this.hh(b, c, d, a, k[6], 23, 76029189);
+        a = this.hh(a, b, c, d, k[9], 4, -640364487);
+        d = this.hh(d, a, b, c, k[12], 11, -421815835);
+        c = this.hh(c, d, a, b, k[15], 16, 530742520);
+        b = this.hh(b, c, d, a, k[2], 23, -995338651);
+        a = this.ii(a, b, c, d, k[0], 6, -198630844);
+        d = this.ii(d, a, b, c, k[7], 10, 1126891415);
+        c = this.ii(c, d, a, b, k[14], 15, -1416354905);
+        b = this.ii(b, c, d, a, k[5], 21, -57434055);
+        a = this.ii(a, b, c, d, k[12], 6, 1700485571);
+        d = this.ii(d, a, b, c, k[3], 10, -1894986606);
+        c = this.ii(c, d, a, b, k[10], 15, -1051523);
+        b = this.ii(b, c, d, a, k[1], 21, -2054922799);
+        a = this.ii(a, b, c, d, k[8], 6, 1873313359);
+        d = this.ii(d, a, b, c, k[15], 10, -30611744);
+        c = this.ii(c, d, a, b, k[6], 15, -1560198380);
+        b = this.ii(b, c, d, a, k[13], 21, 1309151649);
+        a = this.ii(a, b, c, d, k[4], 6, -145523070);
+        d = this.ii(d, a, b, c, k[11], 10, -1120210379);
+        c = this.ii(c, d, a, b, k[2], 15, 718787259);
+        b = this.ii(b, c, d, a, k[9], 21, -343485551);
+        x[0] = this.add32(a, x[0]);
+        x[1] = this.add32(b, x[1]);
+        x[2] = this.add32(c, x[2]);
+        x[3] = this.add32(d, x[3]);
+    };
+    MD5.prototype.cmn = function (q, a, b, x, s, t) {
+        a = this.add32(this.add32(a, q), this.add32(x, t));
+        return this.add32((a << s) | (a >>> (32 - s)), b);
+    };
+    MD5.prototype.ff = function (a, b, c, d, x, s, t) {
+        return this.cmn((b & c) | ((~b) & d), a, b, x, s, t);
+    };
+    MD5.prototype.gg = function (a, b, c, d, x, s, t) {
+        return this.cmn((b & d) | (c & (~d)), a, b, x, s, t);
+    };
+    MD5.prototype.hh = function (a, b, c, d, x, s, t) {
+        return this.cmn(b ^ c ^ d, a, b, x, s, t);
+    };
+    MD5.prototype.ii = function (a, b, c, d, x, s, t) {
+        return this.cmn(c ^ (b | (~d)), a, b, x, s, t);
+    };
+    MD5.prototype.md51 = function (s) {
+        var n = s.length;
+        var state = [1732584193, -271733879, -1732584194, 271733878];
+        var i;
+        for (i = 64; i <= s.length; i += 64) {
+            this.md5cycle(state, this.md5blk(s.substring(i - 64, i)));
+        }
+        s = s.substring(i - 64);
+        var tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        for (i = 0; i < s.length; i++) {
+            tail[i >> 2] |= s.charCodeAt(i) << ((i % 4) << 3);
+        }
+        tail[i >> 2] |= 0x80 << ((i % 4) << 3);
+        if (i > 55) {
+            this.md5cycle(state, tail);
+            for (i = 0; i < 16; i++) {
+                tail[i] = 0;
+            }
+        }
+        tail[14] = n * 8;
+        this.md5cycle(state, tail);
+        return state;
+    };
+    /* there needs to be support for Unicode here, * unless we pretend that we can redefine the MD-5
+     * algorithm for multi-byte characters (perhaps by adding every four 16-bit characters and
+     * shortening the sum to 32 bits). Otherwise I suthis.ggest performing MD-5 as if every character
+     * was two bytes--e.g., 0040 0025 = @%--but then how will an ordinary MD-5 sum be matched?
+     * There is no way to standardize text to something like UTF-8 before transformation; speed cost is
+     * utterly prohibitive. The JavaScript standard itself needs to look at this: it should start
+     * providing access to strings as preformed UTF-8 8-bit unsigned value arrays.
+     */
+    MD5.prototype.md5blk = function (s) {
+        var md5blks = [];
+        /* Andy King said do it this way. */
+        for (var i = 0; i < 64; i += 4) {
+            md5blks[i >> 2] = s.charCodeAt(i)
+                + (s.charCodeAt(i + 1) << 8)
+                + (s.charCodeAt(i + 2) << 16)
+                + (s.charCodeAt(i + 3) << 24);
+        }
+        return md5blks;
+    };
+    MD5.prototype.rhex = function (n) {
+        var hex_chr = '0123456789abcdef'.split('');
+        var s = '', j = 0;
+        for (; j < 4; j++) {
+            s += hex_chr[(n >> (j * 8 + 4)) & 0x0F]
+                + hex_chr[(n >> (j * 8)) & 0x0F];
+        }
+        return s;
+    };
+    MD5.prototype.hex = function (x) {
+        for (var i = 0; i < x.length; i++) {
+            x[i] = this.rhex(x[i]);
+        }
+        return x.join('');
+    };
+    MD5.prototype.md5 = function (s) {
+        return this.hex(this.md51(s));
+    };
+    MD5.prototype.add32 = function (a, b) {
+        return this.ieCompatibility ? this.add32Compat(a, b) : this.add32Std(a, b);
+    };
+    /* this function is much faster, so if possible we use it. Some IEs are the only ones I know of that
+     need the idiotic second function, generated by an if clause.  */
+    MD5.prototype.add32Std = function (a, b) {
+        return (a + b) & 0xFFFFFFFF;
+    };
+    MD5.prototype.add32Compat = function (x, y) {
+        var lsw = (x & 0xFFFF) + (y & 0xFFFF), msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+        return (msw << 16) | (lsw & 0xFFFF);
+    };
+    __decorate$1_([
+        PostConstruct
+    ], MD5.prototype, "init", null);
+    MD5 = __decorate$1_([
+        Bean('md5')
+    ], MD5);
+    return MD5;
+}());
+
+var __extends$1g = (undefined && undefined.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __decorate$1$ = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var WatermarkComp = /** @class */ (function (_super) {
+    __extends$1g(WatermarkComp, _super);
+    function WatermarkComp() {
+        return _super.call(this, "<div class=\"ag-watermark\">\n                    <div ref=\"eLicenseTextRef\" class=\"ag-watermark-text\"></div>\n               </div>") || this;
+    }
+    WatermarkComp.prototype.postConstruct = function () {
+        var _this = this;
+        var show = this.shouldDisplayWatermark();
+        _.addOrRemoveCssClass(this.getGui(), 'ag-hidden', !show);
+        if (show) {
+            this.eLicenseTextRef.innerText = this.licenseManager.getWatermarkMessage();
+            window.setTimeout(function () { return _this.addCssClass('ag-opacity-zero'); }, 0);
+            window.setTimeout(function () { return _this.addCssClass('ag-hidden'); }, 5000);
+        }
+    };
+    WatermarkComp.prototype.shouldDisplayWatermark = function () {
+        var isDisplayWatermark = this.licenseManager.isDisplayWatermark();
+        var isWhiteListURL = location.hostname.match('^127\.0\.0\.1|localhost|www\.ag-grid\.com$') != null;
+        var isForceWatermark = location.search.indexOf('forceWatermark') !== -1;
+        return isForceWatermark || (isDisplayWatermark && !isWhiteListURL);
+    };
+    __decorate$1$([
+        Autowired('licenseManager')
+    ], WatermarkComp.prototype, "licenseManager", void 0);
+    __decorate$1$([
+        RefSelector('eLicenseTextRef')
+    ], WatermarkComp.prototype, "eLicenseTextRef", void 0);
+    __decorate$1$([
+        PostConstruct
+    ], WatermarkComp.prototype, "postConstruct", null);
+    return WatermarkComp;
+}(Component));
+
+var EnterpriseCoreModule = {
+    moduleName: exports.ModuleNames.EnterpriseCoreModule,
+    beans: [LicenseManager, MD5],
+    agStackComponents: [
+        { componentName: 'AgWatermark', componentClass: WatermarkComp }
+    ]
+};
+
+// we cannot have 'null' as a key in a JavaScript map,
+// it needs to be a string. so we use this string for
+// storing null values.
+var NULL_VALUE = '___NULL___';
+var SetFilterModelValuesType;
+(function (SetFilterModelValuesType) {
+    SetFilterModelValuesType[SetFilterModelValuesType["PROVIDED_LIST"] = 0] = "PROVIDED_LIST";
+    SetFilterModelValuesType[SetFilterModelValuesType["PROVIDED_CB"] = 1] = "PROVIDED_CB";
+    SetFilterModelValuesType[SetFilterModelValuesType["NOT_PROVIDED"] = 2] = "NOT_PROVIDED";
+})(SetFilterModelValuesType || (SetFilterModelValuesType = {}));
+var SetValueModel = /** @class */ (function () {
+    function SetValueModel(colDef, rowModel, valueGetter, doesRowPassOtherFilters, suppressSorting, modelUpdatedFunc, isLoadingFunc, valueFormatterService, column) {
+        this.suppressSorting = suppressSorting;
+        this.colDef = colDef;
+        this.valueGetter = valueGetter;
+        this.doesRowPassOtherFilters = doesRowPassOtherFilters;
+        this.modelUpdatedFunc = modelUpdatedFunc;
+        this.isLoadingFunc = isLoadingFunc;
+        this.valueFormatterService = valueFormatterService;
+        this.column = column;
+        if (rowModel.getType() === Constants.ROW_MODEL_TYPE_CLIENT_SIDE) {
+            this.clientSideRowModel = rowModel;
+        }
+        this.filterParams = this.colDef.filterParams ? this.colDef.filterParams : {};
+        if (_.exists(this.filterParams) && _.exists(this.filterParams.values)) {
+            this.valuesType = Array.isArray(this.filterParams.values) ?
+                SetFilterModelValuesType.PROVIDED_LIST :
+                SetFilterModelValuesType.PROVIDED_CB;
+            this.showingAvailableOnly = this.filterParams.suppressRemoveEntries !== true;
+        }
+        else {
+            this.valuesType = SetFilterModelValuesType.NOT_PROVIDED;
+            this.showingAvailableOnly = true;
+        }
+        this.createAllUniqueValues();
+        this.createAvailableUniqueValues();
+        // by default, no filter, so we display everything
+        this.displayedValues = this.availableUniqueValues;
+        this.miniFilter = null;
+        // we use a map rather than an array for the selected values as the lookup
+        // for a map is much faster than the lookup for an array, especially when
+        // the length of the array is thousands of records long
+        this.selectedValuesMap = {};
+        this.selectAllUsingMiniFilter();
+        this.formatter = this.filterParams.textFormatter ? this.filterParams.textFormatter : TextFilter.DEFAULT_FORMATTER;
+    }
+    // if keepSelection not set will always select all filters
+    // if keepSelection set will keep current state of selected filters
+    //    unless selectAll chosen in which case will select all
+    SetValueModel.prototype.refreshAfterNewRowsLoaded = function (keepSelection, everythingSelected) {
+        this.createAllUniqueValues();
+        this.refreshSelection(keepSelection, everythingSelected);
+    };
+    // if keepSelection not set will always select all filters
+    // if keepSelection set will keep current state of selected filters
+    //    unless selectAll chosen in which case will select all
+    SetValueModel.prototype.refreshValues = function (valuesToUse, keepSelection, isSelectAll) {
+        this.setValues(valuesToUse);
+        this.refreshSelection(keepSelection, isSelectAll);
+    };
+    SetValueModel.prototype.refreshSelection = function (keepSelection, isSelectAll) {
+        this.createAvailableUniqueValues();
+        var oldModel = Object.keys(this.selectedValuesMap);
+        this.selectedValuesMap = {};
+        this.processMiniFilter();
+        if (keepSelection) {
+            this.setModel(oldModel, isSelectAll);
+        }
+        else {
+            this.selectAllUsingMiniFilter();
+        }
+    };
+    SetValueModel.prototype.refreshAfterAnyFilterChanged = function () {
+        if (this.showingAvailableOnly) {
+            this.createAvailableUniqueValues();
+            this.processMiniFilter();
+        }
+    };
+    SetValueModel.prototype.createAllUniqueValues = function () {
+        if (this.areValuesSync()) {
+            var valuesToUse = this.extractSyncValuesToUse();
+            this.setValues(valuesToUse);
+            this.filterValuesPromise = Promise.resolve([]);
+        }
+        else {
+            this.filterValuesExternalPromise = Promise.external();
+            this.filterValuesPromise = this.filterValuesExternalPromise.promise;
+            this.isLoadingFunc(true);
+            this.setValues([]);
+            var callback_1 = this.filterParams.values;
+            var params_1 = {
+                success: this.onAsyncValuesLoaded.bind(this),
+                colDef: this.colDef
+            };
+            window.setTimeout(function () { return callback_1(params_1); }, 0);
+        }
+    };
+    SetValueModel.prototype.onAsyncValuesLoaded = function (values) {
+        this.modelUpdatedFunc(values);
+        this.isLoadingFunc(false);
+        this.filterValuesExternalPromise.resolve(values);
+    };
+    SetValueModel.prototype.areValuesSync = function () {
+        return this.valuesType == SetFilterModelValuesType.PROVIDED_LIST || this.valuesType == SetFilterModelValuesType.NOT_PROVIDED;
+    };
+    SetValueModel.prototype.setValuesType = function (value) {
+        this.valuesType = value;
+    };
+    SetValueModel.prototype.getValuesType = function () {
+        return this.valuesType;
+    };
+    SetValueModel.prototype.setValues = function (valuesToUse) {
+        this.allUniqueValues = valuesToUse;
+        if (!this.suppressSorting) {
+            this.sortValues(this.allUniqueValues);
+        }
+    };
+    SetValueModel.prototype.extractSyncValuesToUse = function () {
+        var valuesToUse;
+        if (this.valuesType == SetFilterModelValuesType.PROVIDED_LIST) {
+            if (Array.isArray(this.filterParams.values)) {
+                valuesToUse = _.toStrings(this.filterParams.values);
+            }
+            else {
+                // In this case the values are async but have already been resolved, so we can reuse them
+                valuesToUse = this.allUniqueValues;
+            }
+        }
+        else if (this.valuesType == SetFilterModelValuesType.PROVIDED_CB) {
+            throw Error("ag-grid: Error extracting values to use. We should not extract the values synchronously when using a callback for the filterParams.values");
+        }
+        else {
+            var uniqueValuesAsAnyObjects = this.getUniqueValues(false);
+            valuesToUse = _.toStrings(uniqueValuesAsAnyObjects);
+        }
+        return valuesToUse;
+    };
+    SetValueModel.prototype.createAvailableUniqueValues = function () {
+        var dontCheckAvailableValues = !this.showingAvailableOnly || this.valuesType == SetFilterModelValuesType.PROVIDED_LIST || this.valuesType == SetFilterModelValuesType.PROVIDED_CB;
+        if (dontCheckAvailableValues) {
+            this.availableUniqueValues = this.allUniqueValues;
+            return;
+        }
+        var uniqueValuesAsAnyObjects = this.getUniqueValues(true);
+        this.availableUniqueValues = _.toStrings(uniqueValuesAsAnyObjects);
+        this.sortValues(this.availableUniqueValues);
+    };
+    SetValueModel.prototype.sortValues = function (values) {
+        if (this.filterParams && this.filterParams.comparator) {
+            values.sort(this.filterParams.comparator);
+        }
+        else if (this.colDef.comparator) {
+            values.sort(this.colDef.comparator);
+        }
+        else {
+            values.sort(_.defaultComparator);
+        }
+    };
+    SetValueModel.prototype.getUniqueValues = function (filterOutNotAvailable) {
+        var _this = this;
+        var uniqueCheck = {};
+        var result = [];
+        if (!this.clientSideRowModel) {
+            console.error('ag-Grid: Set Filter cannot initialise because you are using a row model that does not contain all rows in the browser. Either use a different filter type, or configure Set Filter such that you provide it with values');
+            return [];
+        }
+        this.clientSideRowModel.forEachLeafNode(function (node) {
+            // only pull values from rows that have data. this means we skip filler group nodes.
+            if (!node.data) {
+                return;
+            }
+            var value = _this.valueGetter(node);
+            if (_this.colDef.keyCreator) {
+                value = _this.colDef.keyCreator({ value: value });
+            }
+            if (value === "" || value === undefined) {
+                value = null;
+            }
+            if (filterOutNotAvailable) {
+                if (!_this.doesRowPassOtherFilters(node)) {
+                    return;
+                }
+            }
+            if (value != null && Array.isArray(value)) {
+                for (var j = 0; j < value.length; j++) {
+                    addUniqueValueIfMissing(value[j]);
+                }
+            }
+            else {
+                addUniqueValueIfMissing(value);
+            }
+        });
+        function addUniqueValueIfMissing(value) {
+            if (!uniqueCheck.hasOwnProperty(value)) {
+                result.push(value);
+                uniqueCheck[value] = 1;
+            }
+        }
+        return result;
+    };
+    //sets mini filter. returns true if it changed from last value, otherwise false
+    SetValueModel.prototype.setMiniFilter = function (newMiniFilter) {
+        newMiniFilter = _.makeNull(newMiniFilter);
+        if (this.miniFilter === newMiniFilter) {
+            //do nothing if filter has not changed
+            return false;
+        }
+        this.miniFilter = newMiniFilter;
+        this.processMiniFilter();
+        return true;
+    };
+    SetValueModel.prototype.getMiniFilter = function () {
+        return this.miniFilter;
+    };
+    SetValueModel.prototype.processMiniFilter = function () {
+        // if no filter, just use the unique values
+        if (this.miniFilter === null) {
+            this.displayedValues = this.availableUniqueValues;
+            return;
+        }
+        // if filter present, we filter down the list
+        this.displayedValues = [];
+        var miniFilter = this.formatter(this.miniFilter);
+        // make upper case to have search case insensitive
+        var miniFilterUpperCase = miniFilter.toUpperCase();
+        //This function encapsulates the logic to check if a string matches the mini filter
+        var matchesFn = function (valueToCheck) {
+            if (valueToCheck == null) {
+                return false;
+            }
+            // allow for case insensitive searches, make both filter and value uppercase
+            var valueUpperCase = valueToCheck.toUpperCase();
+            return valueUpperCase.indexOf(miniFilterUpperCase) >= 0;
+        };
+        for (var i = 0, l = this.availableUniqueValues.length; i < l; i++) {
+            var value = this.availableUniqueValues[i];
+            if (value) {
+                var displayedValue = this.formatter(value.toString());
+                var formattedValue = this.valueFormatterService.formatValue(this.column, null, null, displayedValue);
+                if (matchesFn(displayedValue) || matchesFn(formattedValue)) {
+                    this.displayedValues.push(value);
+                }
+            }
+        }
+    };
+    SetValueModel.prototype.getDisplayedValueCount = function () {
+        return this.displayedValues.length;
+    };
+    SetValueModel.prototype.getDisplayedValue = function (index) {
+        return this.displayedValues[index];
+    };
+    SetValueModel.prototype.selectAllUsingMiniFilter = function () {
+        if (this.miniFilter) {
+            this.selectOn(this.displayedValues);
+        }
+        else {
+            this.selectOn(this.allUniqueValues);
+        }
+    };
+    SetValueModel.prototype.selectOn = function (toSelectOn) {
+        var count = toSelectOn.length;
+        for (var i = 0; i < count; i++) {
+            var key = toSelectOn[i];
+            var safeKey = this.valueToKey(key);
+            this.selectedValuesMap[safeKey] = null;
+        }
+        this.selectedValuesCount = Object.keys(this.selectedValuesMap).length;
+    };
+    SetValueModel.prototype.valueToKey = function (key) {
+        if (key === null) {
+            return NULL_VALUE;
+        }
+        else {
+            return key;
+        }
+    };
+    SetValueModel.prototype.keyToValue = function (value) {
+        if (value === NULL_VALUE) {
+            return null;
+        }
+        else {
+            return value;
+        }
+    };
+    SetValueModel.prototype.isFilterActive = function () {
+        return this.allUniqueValues.length !== this.selectedValuesCount;
+    };
+    SetValueModel.prototype.selectNothingUsingMiniFilter = function () {
+        var _this = this;
+        if (this.miniFilter) {
+            this.displayedValues.forEach(function (it) { return _this.unselectValue(it); });
+        }
+        else {
+            this.selectNothing();
+        }
+    };
+    SetValueModel.prototype.selectNothing = function () {
+        this.selectedValuesMap = {};
+        this.selectedValuesCount = 0;
+    };
+    SetValueModel.prototype.getUniqueValueCount = function () {
+        return this.allUniqueValues.length;
+    };
+    SetValueModel.prototype.getUniqueValue = function (index) {
+        return this.allUniqueValues[index];
+    };
+    SetValueModel.prototype.unselectValue = function (value) {
+        var safeKey = this.valueToKey(value);
+        if (this.selectedValuesMap[safeKey] !== undefined) {
+            delete this.selectedValuesMap[safeKey];
+            this.selectedValuesCount--;
+        }
+    };
+    SetValueModel.prototype.selectAllFromMiniFilter = function () {
+        this.selectNothing();
+        this.selectAllUsingMiniFilter();
+    };
+    SetValueModel.prototype.selectValue = function (value) {
+        var safeKey = this.valueToKey(value);
+        if (this.selectedValuesMap[safeKey] === undefined) {
+            this.selectedValuesMap[safeKey] = null;
+            this.selectedValuesCount++;
+        }
+    };
+    SetValueModel.prototype.isValueSelected = function (value) {
+        var safeKey = this.valueToKey(value);
+        return this.selectedValuesMap[safeKey] !== undefined;
+    };
+    SetValueModel.prototype.isEverythingSelected = function () {
+        var _this = this;
+        if (this.miniFilter) {
+            return this.displayedValues.filter(function (it) { return _this.isValueSelected(it); }).length === this.displayedValues.length;
+        }
+        else {
+            return this.allUniqueValues.length === this.selectedValuesCount;
+        }
+    };
+    SetValueModel.prototype.isNothingSelected = function () {
+        var _this = this;
+        if (this.miniFilter) {
+            return this.displayedValues.filter(function (it) { return _this.isValueSelected(it); }).length === 0;
+        }
+        else {
+            return this.selectedValuesCount === 0;
+        }
+    };
+    SetValueModel.prototype.getModel = function () {
+        var _this = this;
+        if (!this.isFilterActive()) {
+            return null;
+        }
+        var selectedValues = [];
+        _.iterateObject(this.selectedValuesMap, function (key) {
+            var value = _this.keyToValue(key);
+            selectedValues.push(value);
+        });
+        return selectedValues;
+    };
+    SetValueModel.prototype.setModel = function (model, isSelectAll) {
+        var _this = this;
+        if (isSelectAll === void 0) { isSelectAll = false; }
+        if (this.areValuesSync()) {
+            this.setSyncModel(model, isSelectAll);
+        }
+        else {
+            this.filterValuesExternalPromise.promise.then(function (values) {
+                _this.setSyncModel(model, isSelectAll);
+                _this.modelUpdatedFunc(values, model);
+            });
+        }
+    };
+    SetValueModel.prototype.setSyncModel = function (model, isSelectAll) {
+        if (isSelectAll === void 0) { isSelectAll = false; }
+        if (model && !isSelectAll) {
+            this.selectNothingUsingMiniFilter();
+            for (var i = 0; i < model.length; i++) {
+                var rawValue = model[i];
+                var value = this.keyToValue(rawValue);
+                if (this.allUniqueValues.indexOf(value) >= 0) {
+                    this.selectValue(value);
+                }
+            }
+        }
+        else {
+            this.selectAllUsingMiniFilter();
+        }
+    };
+    SetValueModel.prototype.onFilterValuesReady = function (callback) {
+        //This guarantees that if the user is racing to set values async into the set filter, only the first instance
+        //will be used
+        // ie Values are async and the user manually wants to override them before the retrieval of values is triggered
+        // (set filter values in the following example)
+        // http://plnkr.co/edit/eFka7ynvPj68tL3VJFWf?p=preview
+        this.filterValuesPromise.firstOneOnly(callback);
+    };
+    return SetValueModel;
+}());
+
+var __extends$1h = (undefined && undefined.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __decorate$20 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var SetFilterListItem = /** @class */ (function (_super) {
+    __extends$1h(SetFilterListItem, _super);
+    function SetFilterListItem(value, column) {
+        var _this = _super.call(this, SetFilterListItem.TEMPLATE) || this;
+        _this.selected = true;
+        _this.value = value;
+        _this.column = column;
+        return _this;
+    }
+    SetFilterListItem.prototype.useCellRenderer = function (target, eTarget, params) {
+        var cellRendererPromise = this.userComponentFactory.newCellRenderer(target.filterParams, params);
+        if (cellRendererPromise != null) {
+            _.bindCellRendererToHtmlElement(cellRendererPromise, eTarget);
+        }
+        else {
+            if (params.valueFormatted == null && params.value == null) {
+                var localeTextFunc = this.gridOptionsWrapper.getLocaleTextFunc();
+                eTarget.innerText = '(' + localeTextFunc('blanks', 'Blanks') + ')';
+            }
+            else {
+                eTarget.innerText = params.valueFormatted != null ? params.valueFormatted : params.value;
+            }
+        }
+        return cellRendererPromise;
+    };
+    SetFilterListItem.prototype.init = function () {
+        var _this = this;
+        this.eCheckedIcon = _.createIconNoSpan('checkboxChecked', this.gridOptionsWrapper, this.column);
+        this.eUncheckedIcon = _.createIconNoSpan('checkboxUnchecked', this.gridOptionsWrapper, this.column);
+        this.eCheckbox = this.queryForHtmlElement(".ag-filter-checkbox");
+        this.eClickableArea = this.getGui();
+        this.updateCheckboxIcon();
+        this.render();
+        var listener = function (mouseEvent) {
+            mouseEvent.preventDefault();
+            _.addAgGridEventPath(mouseEvent);
+            _this.selected = !_this.selected;
+            _this.updateCheckboxIcon();
+            var event = {
+                type: SetFilterListItem.EVENT_SELECTED
+            };
+            return _this.dispatchEvent(event);
+        };
+        this.addDestroyableEventListener(this.eClickableArea, 'click', listener);
+    };
+    SetFilterListItem.prototype.isSelected = function () {
+        return this.selected;
+    };
+    SetFilterListItem.prototype.setSelected = function (selected) {
+        this.selected = selected;
+        this.updateCheckboxIcon();
+    };
+    SetFilterListItem.prototype.updateCheckboxIcon = function () {
+        _.clearElement(this.eCheckbox);
+        if (this.isSelected()) {
+            this.eCheckbox.appendChild(this.eCheckedIcon);
+        }
+        else {
+            this.eCheckbox.appendChild(this.eUncheckedIcon);
+        }
+    };
+    SetFilterListItem.prototype.render = function () {
+        var _this = this;
+        var valueElement = this.queryForHtmlElement(".ag-filter-value");
+        var valueFormatted = this.valueFormatterService.formatValue(this.column, null, null, this.value);
+        var colDef = this.column.getColDef();
+        var params = {
+            value: this.value,
+            valueFormatted: valueFormatted,
+            api: this.gridOptionsWrapper.getApi()
+        };
+        var componentPromise = this.useCellRenderer(colDef, valueElement, params);
+        if (!componentPromise) {
+            return;
+        }
+        componentPromise.then(function (component) {
+            if (component && component.destroy) {
+                _this.addDestroyFunc(component.destroy.bind(component));
+            }
+        });
+    };
+    SetFilterListItem.EVENT_SELECTED = 'selected';
+    SetFilterListItem.TEMPLATE = "<label class=\"ag-set-filter-item\">\n            <div class=\"ag-filter-checkbox\"></div>\n            <span class=\"ag-filter-value\"></span>\n        </label>";
+    __decorate$20([
+        Autowired('gridOptionsWrapper')
+    ], SetFilterListItem.prototype, "gridOptionsWrapper", void 0);
+    __decorate$20([
+        Autowired('valueFormatterService')
+    ], SetFilterListItem.prototype, "valueFormatterService", void 0);
+    __decorate$20([
+        Autowired('userComponentFactory')
+    ], SetFilterListItem.prototype, "userComponentFactory", void 0);
+    __decorate$20([
+        PostConstruct
+    ], SetFilterListItem.prototype, "init", null);
+    return SetFilterListItem;
+}(Component));
+
+var __extends$1i = (undefined && undefined.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __decorate$21 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var CheckboxState;
+(function (CheckboxState) {
+    CheckboxState[CheckboxState["CHECKED"] = 0] = "CHECKED";
+    CheckboxState[CheckboxState["UNCHECKED"] = 1] = "UNCHECKED";
+    CheckboxState[CheckboxState["INTERMEDIATE"] = 2] = "INTERMEDIATE";
+})(CheckboxState || (CheckboxState = {}));
+var SetFilter = /** @class */ (function (_super) {
+    __extends$1i(SetFilter, _super);
+    function SetFilter() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    // unlike the simple filter's, nothing in the set filter UI shows/hides.
+    // maybe this method belongs in abstractSimpleFilter???
+    SetFilter.prototype.updateUiVisibility = function () { };
+    SetFilter.prototype.createBodyTemplate = function () {
+        var translate = this.gridOptionsWrapper.getLocaleTextFunc();
+        return "<div ref=\"ag-filter-loading\" class=\"loading-filter ag-hidden\">" + translate('loadingOoo', 'Loading...') + "</div>\n                <div>\n                    <div class=\"ag-filter-header-container\" role=\"presentation\">\n                        <div class=\"ag-input-wrapper\" id=\"ag-mini-filter\" role=\"presentation\">\n                            <input ref=\"eMiniFilter\" class=\"ag-filter-filter\" type=\"text\" placeholder=\"" + translate('searchOoo', 'Search...') + "\"/>\n                        </div>\n                        <label ref=\"eSelectAllContainer\" class=\"ag-set-filter-item\">\n                            <div ref=\"eSelectAll\" class=\"ag-filter-checkbox\"></div><span class=\"ag-filter-value\">(" + translate('selectAll', 'Select All') + ")</span>\n                        </label>\n                    </div>\n                    <div ref=\"eSetFilterList\" class=\"ag-set-filter-list\" role=\"presentation\"></div>\n                </div>";
+    };
+    SetFilter.prototype.resetUiToDefaults = function () {
+        this.setMiniFilter(null);
+        this.valueModel.setModel(null, true);
+        this.selectEverything();
+    };
+    SetFilter.prototype.setModelIntoUi = function (model) {
+        this.resetUiToDefaults();
+        if (model) {
+            if (model instanceof Array) {
+                var message_1 = 'ag-Grid: The Set Filter Model is no longer an array and models as arrays are ' +
+                    'deprecated. Please check the docs on what the set filter model looks like. Future versions of ' +
+                    'ag-Grid will have the array version of the model removed.';
+                _.doOnce(function () { return console.warn(message_1); }, 'setFilter.modelAsArray');
+            }
+            // also supporting old filter model for backwards compatibility
+            var newValues = (model instanceof Array) ? model : model.values;
+            this.valueModel.setModel(newValues);
+            this.updateSelectAll();
+            this.virtualList.refresh();
+        }
+    };
+    SetFilter.prototype.getModelFromUi = function () {
+        var values = this.valueModel.getModel();
+        if (!values) {
+            return null;
+        }
+        if (this.gridOptionsWrapper.isEnableOldSetFilterModel()) {
+            // this is a hack, it breaks casting rules, to apply with old model
+            return values;
+        }
+        else {
+            return {
+                values: values,
+                filterType: 'set'
+            };
+        }
+    };
+    SetFilter.prototype.areModelsEqual = function (a, b) {
+        return false;
+    };
+    SetFilter.prototype.setParams = function (params) {
+        _super.prototype.setParams.call(this, params);
+        this.checkSetFilterDeprecatedParams(params);
+        this.setFilterParams = params;
+        this.eCheckedIcon = _.createIconNoSpan('checkboxChecked', this.gridOptionsWrapper, this.setFilterParams.column);
+        this.eUncheckedIcon = _.createIconNoSpan('checkboxUnchecked', this.gridOptionsWrapper, this.setFilterParams.column);
+        this.eIndeterminateCheckedIcon = _.createIconNoSpan('checkboxIndeterminate', this.gridOptionsWrapper, this.setFilterParams.column);
+        this.initialiseFilterBodyUi();
+        var syncValuesAfterDataChange = !params.suppressSyncValuesAfterDataChange
+            // sync values only with CSRM
+            && this.rowModel.getType() === Constants.ROW_MODEL_TYPE_CLIENT_SIDE
+            // sync only needed if user not providing values
+            && !params.values;
+        if (syncValuesAfterDataChange) {
+            this.setupSyncValuesAfterDataChange();
+        }
+    };
+    SetFilter.prototype.checkSetFilterDeprecatedParams = function (params) {
+        if (params.syncValuesLikeExcel) {
+            var message_2 = 'ag-Grid: since version 22.x, the Set Filter param syncValuesLikeExcel is no longer' +
+                ' used as this is the default behaviour. To turn this default behaviour off, use the' +
+                ' param suppressSyncValuesAfterDataChange';
+            _.doOnce(function () { return console.warn(message_2); }, 'syncValuesLikeExcel deprecated');
+        }
+        if (params.selectAllOnMiniFilter) {
+            var message_3 = 'ag-Grid: since version 22.x, the Set Filter param selectAllOnMiniFilter is no longer' +
+                ' used as this is the default behaviour.';
+            _.doOnce(function () { return console.warn(message_3); }, 'selectAllOnMiniFilter deprecated');
+        }
+    };
+    SetFilter.prototype.resetFilterValuesAndReapplyModel = function () {
+        var modelBeforeUpdate = this.getModel();
+        this.resetFilterValues();
+        if (modelBeforeUpdate) {
+            this.setModel(modelBeforeUpdate);
+        }
+    };
+    SetFilter.prototype.setupSyncValuesAfterDataChange = function () {
+        var _this = this;
+        var col = this.setFilterParams.column;
+        var rowDataUpdatedListener = function () {
+            _this.resetFilterValuesAndReapplyModel();
+        };
+        var cellValueChangedListener = function (event) {
+            // only interested in changes to do with this column
+            if (event.column !== col) {
+                return;
+            }
+            _this.resetFilterValuesAndReapplyModel();
+        };
+        this.addDestroyableEventListener(this.eventService, Events.EVENT_ROW_DATA_UPDATED, rowDataUpdatedListener);
+        this.addDestroyableEventListener(this.eventService, Events.EVENT_CELL_VALUE_CHANGED, cellValueChangedListener);
+    };
+    SetFilter.prototype.updateCheckboxIcon = function () {
+        _.clearElement(this.eSelectAll);
+        var icon;
+        switch (this.selectAllState) {
+            case CheckboxState.INTERMEDIATE:
+                icon = this.eIndeterminateCheckedIcon;
+                break;
+            case CheckboxState.CHECKED:
+                icon = this.eCheckedIcon;
+                break;
+            case CheckboxState.UNCHECKED:
+                icon = this.eUncheckedIcon;
+                break;
+            default: // default happens when initialising for first time
+                icon = this.eCheckedIcon;
+                break;
+        }
+        this.eSelectAll.appendChild(icon);
+    };
+    SetFilter.prototype.setLoading = function (loading) {
+        _.setDisplayed(this.eFilterLoading, loading);
+    };
+    SetFilter.prototype.initialiseFilterBodyUi = function () {
+        var _this = this;
+        this.virtualList = new VirtualList();
+        this.getContext().wireBean(this.virtualList);
+        var eSetFilterList = this.getRefElement('eSetFilterList');
+        if (eSetFilterList) {
+            eSetFilterList.appendChild(this.virtualList.getGui());
+        }
+        this.virtualList.setComponentCreator(this.createSetListItem.bind(this));
+        this.valueModel = new SetValueModel(this.setFilterParams.colDef, this.setFilterParams.rowModel, this.setFilterParams.valueGetter, this.setFilterParams.doesRowPassOtherFilter, this.setFilterParams.suppressSorting, function (values, toSelect) { return _this.setFilterValues(values, toSelect ? false : true, toSelect ? true : false, toSelect); }, this.setLoading.bind(this), this.valueFormatterService, this.setFilterParams.column);
+        this.virtualList.setModel(new ModelWrapper(this.valueModel));
+        _.setDisplayed(this.getGui().querySelector('#ag-mini-filter'), !this.setFilterParams.suppressMiniFilter);
+        this.eMiniFilter.value = this.valueModel.getMiniFilter();
+        this.addDestroyableEventListener(this.eMiniFilter, 'input', this.onMiniFilterInput.bind(this));
+        this.addDestroyableEventListener(this.eMiniFilter, 'keypress', this.onMiniFilterKeyPress.bind(this));
+        this.updateCheckboxIcon();
+        this.addDestroyableEventListener(this.eSelectAllContainer, 'click', this.onSelectAll.bind(this));
+        this.updateSelectAll();
+        if (this.setFilterParams.suppressSelectAll) {
+            _.setDisplayed(this.eSelectAllContainer, false);
+        }
+        this.virtualList.refresh();
+    };
+    SetFilter.prototype.createSetListItem = function (value) {
+        var _this = this;
+        var listItem = new SetFilterListItem(value, this.setFilterParams.column);
+        this.getContext().wireBean(listItem);
+        listItem.setSelected(this.valueModel.isValueSelected(value));
+        listItem.addEventListener(SetFilterListItem.EVENT_SELECTED, function () {
+            _this.onItemSelected(value, listItem.isSelected());
+        });
+        return listItem;
+    };
+    // we need to have the gui attached before we can draw the virtual rows, as the
+    // virtual row logic needs info about the gui state
+    SetFilter.prototype.afterGuiAttached = function (params) {
+        this.virtualList.refresh();
+        this.eMiniFilter.focus();
+    };
+    SetFilter.prototype.refreshVirtualList = function () {
+        this.virtualList.refresh();
+    };
+    SetFilter.prototype.applyModel = function () {
+        var _this = this;
+        var res = _super.prototype.applyModel.call(this);
+        // keep the appliedModelValuesMapped in sync with the applied model
+        var appliedModel = this.getModel();
+        if (appliedModel) {
+            this.appliedModelValuesMapped = {};
+            appliedModel.values.forEach(function (value) { return _this.appliedModelValuesMapped[value] = true; });
+        }
+        else {
+            this.appliedModelValuesMapped = undefined;
+        }
+        return res;
+    };
+    SetFilter.prototype.doesFilterPass = function (params) {
+        // should never happen, if filter model not set, then this method should never be called
+        if (!this.appliedModelValuesMapped) {
+            return true;
+        }
+        var value = this.setFilterParams.valueGetter(params.node);
+        if (this.setFilterParams.colDef.keyCreator) {
+            value = this.setFilterParams.colDef.keyCreator({ value: value });
+        }
+        value = _.makeNull(value);
+        if (Array.isArray(value)) {
+            for (var i = 0; i < value.length; i++) {
+                var valueExistsInMap = !!this.appliedModelValuesMapped[value[i]];
+                if (valueExistsInMap) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        else {
+            var valueExistsInMap = !!this.appliedModelValuesMapped[value];
+            return valueExistsInMap;
+        }
+    };
+    SetFilter.prototype.onNewRowsLoaded = function () {
+        var valuesType = this.valueModel.getValuesType();
+        var valuesTypeProvided = valuesType === SetFilterModelValuesType.PROVIDED_CB
+            || valuesType === SetFilterModelValuesType.PROVIDED_LIST;
+        // if the user is providing values, and we are keeping the previous selection, then
+        // loading new rows into the grid should have no impact.
+        var newRowsActionKeep = this.isNewRowsActionKeep();
+        if (newRowsActionKeep && valuesTypeProvided) {
+            return;
+        }
+        var everythingSelected = !this.getModel();
+        // default is reset
+        this.valueModel.refreshAfterNewRowsLoaded(newRowsActionKeep, everythingSelected);
+        this.updateSelectAll();
+        this.virtualList.refresh();
+        this.applyModel();
+    };
+    //noinspection JSUnusedGlobalSymbols
+    /**
+     * Public method provided so the user can change the value of the filter once
+     * the filter has been already started
+     * @param options The options to use.
+     * @param selectAll If by default all the values should be selected.
+     * @param notify If we should let know the model that the values of the filter have changed
+     * @param toSelect The subset of options to subselect
+     */
+    SetFilter.prototype.setFilterValues = function (options, selectAll, notify, toSelect) {
+        var _this = this;
+        if (selectAll === void 0) { selectAll = false; }
+        if (notify === void 0) { notify = true; }
+        this.valueModel.onFilterValuesReady(function () {
+            var keepSelection = _this.setFilterParams && _this.setFilterParams.newRowsAction === 'keep';
+            _this.valueModel.setValuesType(SetFilterModelValuesType.PROVIDED_LIST);
+            _this.valueModel.refreshValues(options, keepSelection, selectAll);
+            _this.updateSelectAll();
+            var actualToSelect = toSelect ? toSelect : options;
+            actualToSelect.forEach(function (option) { return _this.valueModel.selectValue(option); });
+            _this.virtualList.refresh();
+            if (notify) {
+                // this.onUiChangedListener(true);
+                _this.onUiChanged();
+            }
+        });
+    };
+    //noinspection JSUnusedGlobalSymbols
+    /**
+     * Public method provided so the user can reset the values of the filter once that it has started
+     * @param options The options to use.
+     */
+    SetFilter.prototype.resetFilterValues = function () {
+        this.valueModel.setValuesType(SetFilterModelValuesType.NOT_PROVIDED);
+        this.onNewRowsLoaded();
+    };
+    SetFilter.prototype.onAnyFilterChanged = function () {
+        this.valueModel.refreshAfterAnyFilterChanged();
+        this.virtualList.refresh();
+    };
+    SetFilter.prototype.updateSelectAll = function () {
+        if (this.valueModel.isEverythingSelected()) {
+            this.selectAllState = CheckboxState.CHECKED;
+        }
+        else if (this.valueModel.isNothingSelected()) {
+            this.selectAllState = CheckboxState.UNCHECKED;
+        }
+        else {
+            this.selectAllState = CheckboxState.INTERMEDIATE;
+        }
+        this.updateCheckboxIcon();
+    };
+    SetFilter.prototype.onMiniFilterKeyPress = function (e) {
+        if (_.isKeyPressed(e, Constants.KEY_ENTER)) {
+            this.onEnterKeyOnMiniFilter();
+        }
+    };
+    SetFilter.prototype.onEnterKeyOnMiniFilter = function () {
+        this.valueModel.selectAllFromMiniFilter();
+        this.virtualList.refresh();
+        this.updateSelectAll();
+        this.onUiChanged();
+    };
+    SetFilter.prototype.onMiniFilterInput = function () {
+        var miniFilterChanged = this.valueModel.setMiniFilter(this.eMiniFilter.value);
+        if (miniFilterChanged) {
+            this.virtualList.refresh();
+        }
+        this.updateSelectAll();
+    };
+    SetFilter.prototype.onSelectAll = function (event) {
+        event.preventDefault();
+        _.addAgGridEventPath(event);
+        if (this.selectAllState === CheckboxState.CHECKED) {
+            this.selectAllState = CheckboxState.UNCHECKED;
+        }
+        else {
+            this.selectAllState = CheckboxState.CHECKED;
+        }
+        this.doSelectAll();
+    };
+    SetFilter.prototype.doSelectAll = function () {
+        var checked = this.selectAllState === CheckboxState.CHECKED;
+        if (checked) {
+            this.valueModel.selectAllUsingMiniFilter();
+        }
+        else {
+            this.valueModel.selectNothingUsingMiniFilter();
+        }
+        this.virtualList.refresh();
+        this.onUiChanged();
+        this.updateSelectAll();
+    };
+    SetFilter.prototype.onItemSelected = function (value, selected) {
+        if (selected) {
+            this.valueModel.selectValue(value);
+        }
+        else {
+            this.valueModel.unselectValue(value);
+        }
+        this.updateSelectAll();
+        this.onUiChanged();
+    };
+    SetFilter.prototype.setMiniFilter = function (newMiniFilter) {
+        this.valueModel.setMiniFilter(newMiniFilter);
+        this.eMiniFilter.value = this.valueModel.getMiniFilter();
+    };
+    SetFilter.prototype.getMiniFilter = function () {
+        return this.valueModel.getMiniFilter();
+    };
+    SetFilter.prototype.selectEverything = function () {
+        this.valueModel.selectAllUsingMiniFilter();
+        this.updateSelectAll();
+        this.virtualList.refresh();
+    };
+    SetFilter.prototype.selectNothing = function () {
+        this.valueModel.selectNothingUsingMiniFilter();
+        this.updateSelectAll();
+        this.virtualList.refresh();
+    };
+    SetFilter.prototype.unselectValue = function (value) {
+        this.valueModel.unselectValue(value);
+        this.updateSelectAll();
+        this.virtualList.refresh();
+    };
+    SetFilter.prototype.selectValue = function (value) {
+        this.valueModel.selectValue(value);
+        this.updateSelectAll();
+        this.virtualList.refresh();
+    };
+    SetFilter.prototype.isValueSelected = function (value) {
+        return this.valueModel.isValueSelected(value);
+    };
+    SetFilter.prototype.isEverythingSelected = function () {
+        return this.valueModel.isEverythingSelected();
+    };
+    SetFilter.prototype.isNothingSelected = function () {
+        return this.valueModel.isNothingSelected();
+    };
+    SetFilter.prototype.getUniqueValueCount = function () {
+        return this.valueModel.getUniqueValueCount();
+    };
+    SetFilter.prototype.getUniqueValue = function (index) {
+        return this.valueModel.getUniqueValue(index);
+    };
+    __decorate$21([
+        RefSelector('eSelectAll')
+    ], SetFilter.prototype, "eSelectAll", void 0);
+    __decorate$21([
+        RefSelector('eSelectAllContainer')
+    ], SetFilter.prototype, "eSelectAllContainer", void 0);
+    __decorate$21([
+        RefSelector('eMiniFilter')
+    ], SetFilter.prototype, "eMiniFilter", void 0);
+    __decorate$21([
+        RefSelector('ag-filter-loading')
+    ], SetFilter.prototype, "eFilterLoading", void 0);
+    __decorate$21([
+        Autowired('valueFormatterService')
+    ], SetFilter.prototype, "valueFormatterService", void 0);
+    __decorate$21([
+        Autowired('eventService')
+    ], SetFilter.prototype, "eventService", void 0);
+    return SetFilter;
+}(ProvidedFilter));
+var ModelWrapper = /** @class */ (function () {
+    function ModelWrapper(model) {
+        this.model = model;
+    }
+    ModelWrapper.prototype.getRowCount = function () {
+        return this.model.getDisplayedValueCount();
+    };
+    ModelWrapper.prototype.getRow = function (index) {
+        return this.model.getDisplayedValue(index);
+    };
+    return ModelWrapper;
+}());
+
+var __extends$1j = (undefined && undefined.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __decorate$22 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var SetFloatingFilterComp = /** @class */ (function (_super) {
+    __extends$1j(SetFloatingFilterComp, _super);
+    function SetFloatingFilterComp() {
+        return _super.call(this, "<div class=\"ag-input-wrapper\" role=\"presentation\"><input ref=\"eFloatingFilterText\" class=\"ag-floating-filter-input\"></div>") || this;
+    }
+    SetFloatingFilterComp.prototype.init = function (params) {
+        this.eFloatingFilterText.disabled = true;
+        this.column = params.column;
+    };
+    SetFloatingFilterComp.prototype.onParentModelChanged = function (parentModel) {
+        var _this = this;
+        if (!parentModel) {
+            this.eFloatingFilterText.value = '';
+            return;
+        }
+        // also supporting old filter model for backwards compatibility
+        var values = (parentModel instanceof Array) ? parentModel : parentModel.values;
+        if (!values || values.length === 0) {
+            this.eFloatingFilterText.value = '';
+            return;
+        }
+        // format all the values, if a formatter is provided
+        var formattedValues = values.map(function (value) {
+            var formattedValue = _this.valueFormatterService.formatValue(_this.column, null, null, value);
+            return formattedValue != null ? formattedValue : value;
+        });
+        var arrayToDisplay = formattedValues.length > 10 ? formattedValues.slice(0, 10).concat('...') : formattedValues;
+        var valuesString = "(" + values.length + ") " + arrayToDisplay.join(",");
+        this.eFloatingFilterText.value = valuesString;
+    };
+    __decorate$22([
+        RefSelector('eFloatingFilterText')
+    ], SetFloatingFilterComp.prototype, "eFloatingFilterText", void 0);
+    __decorate$22([
+        Autowired('valueFormatterService')
+    ], SetFloatingFilterComp.prototype, "valueFormatterService", void 0);
+    return SetFloatingFilterComp;
+}(Component));
+
+var SetFilterModule = {
+    moduleName: exports.ModuleNames.SetFilterModule,
+    beans: [],
+    userComponents: [
+        { componentName: 'agSetColumnFilter', componentClass: SetFilter },
+        { componentName: 'agSetColumnFloatingFilter', componentClass: SetFloatingFilterComp },
+    ],
+    dependantModules: [
+        EnterpriseCoreModule
+    ]
+};
+
+var AllCommunityModules = [ClientSideRowModelModule, InfiniteRowModelModule, CsvExportModule, SetFilterModule];
 
 exports.AgAbstractField = AgAbstractField;
 exports.AgAngleSelect = AgAngleSelect;
@@ -39488,6 +40987,7 @@ exports.ScrollVisibleService = ScrollVisibleService;
 exports.SelectCellEditor = SelectCellEditor;
 exports.SelectableService = SelectableService;
 exports.SelectionController = SelectionController;
+exports.SetFilterModule = SetFilterModule;
 exports.SetLeftFeature = SetLeftFeature;
 exports.SimpleFilter = SimpleFilter;
 exports.SortController = SortController;
