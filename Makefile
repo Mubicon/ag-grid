@@ -1,4 +1,6 @@
 publish-plus:
-	./publish-community-plus.sh
+	./scripts/publishCommunityPlus.sh
 unpublish-plus:
-	./unpublish-community-plus.sh
+	./scripts/unpublishCommunityPlus.sh
+upgrade-plus:
+	./scripts/upgradeCommunityPlus.sh
